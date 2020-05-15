@@ -3,7 +3,7 @@ BACKGROUND=#073642
 EDGE=#eee8d522
 NODE=#dc322faa
 RNODE=#268bd2aa
-RANKSEP=0.75
+RANKSEP=1
 OUTPUT="$PWD/procwall.png"
 STARTDIR="$PWD"
 
@@ -17,25 +17,33 @@ cleanup() {
 }
 
 generate_graph() {
-    DATA="$(ps -A -o pid,ppid,euid --noheaders)"
+    DATA="$(ps -A -o pid,ppid,euid,%mem --noheaders)"
     _PID=""
     _PPID=""
     _EUID=""
+    _MEM=""
     COLUMN=PID
+
     for VALUE in $DATA; do
         case $COLUMN in
             PID)
-                _PID=$VALUE
                 COLUMN=PPID
+                _PID=$VALUE
                 ;;
             PPID)
-                _PPID=$VALUE
                 COLUMN=EUID
+                _PPID=$VALUE
                 ;;
             EUID)
+                COLUMN=MEM
                 _EUID=$VALUE
+                ;;
+            MEM)
                 COLUMN=PID
+                _MEM=$(bc <<< "scale=3; $VALUE/50 + 0.1")
+                echo $_MEM
                 echo "$_PID -> $_PPID;" >> stripped.gv
+                echo "$_PID [width=$_MEM, height=$_MEM]" >> stripped.gv
                 [[ $_EUID = 0 ]] && echo "$_PID [color=\"$RNODE\"]" >> stripped.gv
                 ;;
         esac
@@ -78,8 +86,8 @@ render_graph() {
         "-Ecolor=${EDGE}"
         "-Ncolor=${NODE}"
         '-Nshape=point'
-        '-Nheight=0.1'
-        '-Nwidth=0.1'
+        '-Nheight=0.3'
+        '-Nwidth=0.3'
         '-Earrowhead=normal'
     )
 
