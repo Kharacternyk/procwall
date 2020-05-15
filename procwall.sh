@@ -5,6 +5,7 @@ set -e
 BACKGROUND=#073642
 EDGE=#eee8d522
 NODE=#dc322faa
+RNODE=#268bd2aa
 RANKSEP=0.75
 OUTPUT="$PWD/procwall.png"
 STARTDIR="$PWD"
@@ -19,17 +20,28 @@ cleanup() {
 }
 
 generate_graph() {
-    PROCS="$(ps -A -o pid,ppid --noheaders)"
-    IS_PARENT=""
-    PREVIOUS=""
-    for PROC in $PROCS; do
-        if [[ -z $IS_PARENT ]]; then
-            IS_PARENT=TRUE
-            PREVIOUS=$PROC
-        else
-            IS_PARENT=""
-            echo "$PROC -> $PREVIOUS;" >> stripped.gv
-        fi
+    DATA="$(ps -A -o pid,ppid,euid --noheaders)"
+    _PID=""
+    _PPID=""
+    _EUID=""
+    COLUMN=PID
+    for VALUE in $DATA; do
+        case $COLUMN in
+            PID)
+                _PID=$VALUE
+                COLUMN=PPID
+                ;;
+            PPID)
+                _PPID=$VALUE
+                COLUMN=EUID
+                ;;
+            EUID)
+                _EUID=$VALUE
+                COLUMN=PID
+                echo "$_PID -> $_PPID;" >> stripped.gv
+                [[ $_EUID = 0 ]] && echo "$_PID [color=\"$RNODE\"]" >> stripped.gv
+                ;;
+        esac
     done
 }
 
@@ -165,6 +177,7 @@ help() {
         [ -b BACKGROUND_COLOR ]
         [ -s EDGE_COLOR ]
         [ -d NODE_COLOR ]
+        [ -x NODE_OWNED_BY_ROOT_COLOR ]
         [ -c ROOT ]
         [ -r RANKSEP ]
         [ -o OUTPUT ]
@@ -188,7 +201,7 @@ help() {
     exit 0
 }
 
-options='hiDWb:s:d:c:r:o:S:'
+options='hiDWb:s:d:x:c:r:o:S:'
 while getopts $options option; do
     case $option in
         h) help ;;
@@ -198,6 +211,7 @@ while getopts $options option; do
         b) BACKGROUND=${OPTARG} ;;
         s) EDGE=${OPTARG} ;;
         d) NODE=${OPTARG} ;;
+        x) RNODE=${OPTARG} ;;
         c) ROOT=${OPTARG} ;;
         r) RANKSEP=${OPTARG} ;;
         o) OUTPUT=${OPTARG} ;;
