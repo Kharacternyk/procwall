@@ -41,8 +41,7 @@ generate_graph() {
             MEM)
                 COLUMN=PID
                 _MEM=$(bc <<< "scale=3; $VALUE/50 + 0.1")
-                echo $_MEM
-                echo "$_PID -> $_PPID;" >> stripped.gv
+                echo "$_PPID -> $_PID;" >> stripped.gv
                 echo "$_PID [width=$_MEM, height=$_MEM]" >> stripped.gv
                 [[ $_EUID = 0 ]] && echo "$_PID [color=\"$RNODE\"]" >> stripped.gv
                 ;;
