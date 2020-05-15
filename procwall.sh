@@ -1,7 +1,4 @@
 #!/bin/bash
-set -e
-
-# Default values.
 BACKGROUND=#073642
 EDGE=#eee8d522
 NODE=#dc322faa
