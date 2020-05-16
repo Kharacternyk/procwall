@@ -1,8 +1,7 @@
 #!/bin/bash
 BACKGROUND=#073642
-EDGE=#eee8d522
-NODE=#dc322faa
-RNODE=#268bd2aa
+EDGE=#b58900
+NODE=#dc322f
 FONT_COLOR=#eee8d5
 FONT_SIZE=10
 FONT_NAME=monospace
@@ -71,8 +70,9 @@ use_wal_colors() {
     # change `n` in `head -n` to use the n-th terminal color set by pywal
     # you can preview these colors in ~/.cache/wal/colors.json
     BACKGROUND=$(head < ~/.cache/wal/colors -1 | tail -1)
-    EDGE=$(head < ~/.cache/wal/colors  -8 | tail -1)22
-    NODE=$(head < ~/.cache/wal/colors  -2 | tail -1)aa
+    EDGE=$(head < ~/.cache/wal/colors  -4 | tail -1)
+    NODE=$(head < ~/.cache/wal/colors  -2 | tail -1)
+    FONT_COLOR=$(head < ~/.cache/wal/colors  -8 | tail -1)
 
     echo "    Background:    ${BACKGROUND}ff"
     echo "    Edge:          $EDGE"
@@ -212,7 +212,7 @@ help() {
     exit 0
 }
 
-options='hiDWb:s:d:x:c:r:o:S:'
+options='hiDWb:s:d:c:r:o:S:'
 while getopts $options option; do
     case $option in
         h) help ;;
@@ -222,7 +222,6 @@ while getopts $options option; do
         b) BACKGROUND=${OPTARG} ;;
         s) EDGE=${OPTARG} ;;
         d) NODE=${OPTARG} ;;
-        x) RNODE=${OPTARG} ;;
         c) ROOT=${OPTARG} ;;
         r) RANKSEP=${OPTARG} ;;
         o) OUTPUT=${OPTARG} ;;
