@@ -3,6 +3,9 @@ BACKGROUND=#073642
 EDGE=#eee8d522
 NODE=#dc322faa
 RNODE=#268bd2aa
+FONT_COLOR=#eee8d5
+FONT_SIZE=10
+FONT_NAME=monospace
 RANKSEP=1
 OUTPUT="$PWD/procwall.png"
 STARTDIR="$PWD"
@@ -17,11 +20,7 @@ cleanup() {
 }
 
 generate_graph() {
-    DATA="$(ps -A -o pid,ppid,euid,%mem --noheaders)"
-    _PID=""
-    _PPID=""
-    _EUID=""
-    _MEM=""
+    DATA="$(ps -U $EUID -o pid,ppid,euid,comm,%mem --noheaders)"
     COLUMN=PID
 
     for VALUE in $DATA; do
@@ -35,15 +34,19 @@ generate_graph() {
                 _PPID=$VALUE
                 ;;
             EUID)
-                COLUMN=MEM
+                COLUMN=COMM
                 _EUID=$VALUE
+                ;;
+            COMM)
+                COLUMN=MEM
+                _COMM=$VALUE
                 ;;
             MEM)
                 COLUMN=PID
-                _MEM=$(bc <<< "scale=3; $VALUE/50 + 0.1")
+                _MEM=$(bc <<< "scale=3; $VALUE/30 + 0.15")
+
                 echo "$_PPID -> $_PID;" >> stripped.gv
-                echo "$_PID [width=$_MEM, height=$_MEM]" >> stripped.gv
-                [[ $_EUID = 0 ]] && echo "$_PID [color=\"$RNODE\"]" >> stripped.gv
+                echo "$_PID [width=$_MEM, height=$_MEM, xlabel=\"$_COMM\"]" >> stripped.gv
                 ;;
         esac
     done
@@ -84,7 +87,11 @@ render_graph() {
         "-Granksep=${RANKSEP}"
         "-Ecolor=${EDGE}"
         "-Ncolor=${NODE}"
-        '-Nshape=point'
+        "-Nfontcolor=${FONT_COLOR}"
+        "-Nfontsize=${FONT_SIZE}"
+        "-Nfontname=${FONT_NAME}"
+        "-Nstyle=filled"
+        "-Nshape=point"
         '-Nheight=0.3'
         '-Nwidth=0.3'
         '-Earrowhead=normal'
