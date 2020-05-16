@@ -2,6 +2,7 @@
 BACKGROUND=#073642
 EDGE=#b58900
 NODE=#dc322f
+SOURCE=#268bd2
 FONT_COLOR=#eee8d5
 FONT_SIZE=12
 FONT_NAME=monospace
@@ -45,7 +46,12 @@ generate_graph() {
                 _MEM=$(bc <<< "scale=3; $VALUE/30 + 0.15")
 
                 echo "$_PPID -> $_PID;" >> stripped.gv
-                echo "$_PID [width=$_MEM, height=$_MEM, xlabel=\"$_COMM\"]" >> stripped.gv
+                echo "$_PID [
+                width=$_MEM,
+                height=$_MEM,
+                color=\"$NODE\",
+                xlabel=\"$_COMM\",
+                ]" >> stripped.gv
                 ;;
         esac
     done
@@ -72,6 +78,7 @@ use_wal_colors() {
     BACKGROUND=$(head < ~/.cache/wal/colors -1 | tail -1)
     EDGE=$(head < ~/.cache/wal/colors  -4 | tail -1)
     NODE=$(head < ~/.cache/wal/colors  -2 | tail -1)
+    SOURCE=$(head < ~/.cache/wal/colors  -5 | tail -1)
     FONT_COLOR=$(head < ~/.cache/wal/colors  -8 | tail -1)
 
     echo "    Background:    ${BACKGROUND}ff"
@@ -86,7 +93,7 @@ render_graph() {
         "-Gbgcolor=${BACKGROUND}"
         "-Granksep=${RANKSEP}"
         "-Ecolor=${EDGE}"
-        "-Ncolor=${NODE}"
+        "-Ncolor=${SOURCE}"
         "-Nfontcolor=${FONT_COLOR}"
         "-Nfontsize=${FONT_SIZE}"
         "-Nfontname=${FONT_NAME}"
